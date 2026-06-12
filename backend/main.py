@@ -12,9 +12,13 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["GET", "POST"],
-    allow_headers=["Authorization", "Content-Type"],
+    allow_origins=[
+        "https://carbon-tracker-pied.vercel.app",  # Your production Vercel domain
+        "http://localhost:3000"                   # Your local development framework
+    ],
+    allow_credentials=True,
+    allow_methods=["*"],                         # Allows GET, POST, OPTIONS, etc.
+    allow_headers=["*"],                         # Allows Authorization, Content-Type, etc.
 )
 
 app.include_router(verify.router, prefix="/api/verify", tags=["Verification"])
