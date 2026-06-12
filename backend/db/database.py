@@ -1,9 +1,20 @@
+import os
 import aiosqlite
 from contextlib import asynccontextmanager
 
 DB_PATH = "storage/carbon_data.db"
 
+def ensure_db_directory():
+    """Defensive check to ensure the folder exists before SQLite tries to read/write."""
+    db_dir = os.path.dirname(DB_PATH)
+    if db_dir and not os.path.exists(db_dir):
+        os.makedirs(db_dir, exist_ok=True)
+        print(f"🌟 Created database directory path at: {db_dir}")
+
 async def init_db():
+    # 🌟 Added Fix: Ensure folder structure exists on Render before connecting
+    ensure_db_directory()
+    
     async with aiosqlite.connect(DB_PATH) as db:
         await db.execute("""
             CREATE TABLE IF NOT EXISTS daily_logs (
@@ -31,6 +42,9 @@ async def init_db():
 
 @asynccontextmanager
 async def get_db_connection():
+    # 🌟 Added Fix: Safeguard connection loops against empty cloud paths on cold boots
+    ensure_db_directory()
+    
     db = await aiosqlite.connect(DB_PATH)
     db.row_factory = aiosqlite.Row
     try:
